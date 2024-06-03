@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenCV Test</title>
+    <link type="stylesheet" href="/src/style.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      #app-video {
+        display: none;
+      }
+
+      @media screen and (max-width: 768px) {
+        body {
+          touch-action: pan-x pan-y;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="main">
+      <canvas id="app-canvas"></canvas>
+      <video id="app-video" autoplay="true"></video>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

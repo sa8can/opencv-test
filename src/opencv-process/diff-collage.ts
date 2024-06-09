@@ -1,6 +1,6 @@
 import cv, { Mat, MatVector } from 'opencv-ts';
-import OpenCVWebCamHelper from './helper/opencv-with-webcam';
-import * as RectUtil from './util/rect-util';
+import OpenCVWebCamHelper from '../helper/opencv-with-webcam';
+import * as RectUtil from '../util/rect-util';
 
 export default class DiffCollage {
   private readonly manager: OpenCVWebCamHelper;

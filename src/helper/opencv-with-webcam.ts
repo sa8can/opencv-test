@@ -1,6 +1,6 @@
 import cv from 'opencv-ts';
 import { getWebCamStream } from './webcam-helper';
-import { onRuntimeInitialized, Updatable } from './frame-updater';
+import Updater, { Updatable } from './updater';
 
 /**
  * webcamの画像をopencvで処理してcanvasに表示するのを簡略化するヘルパークラスです
@@ -13,6 +13,8 @@ export default class OpenCVWebCamHelper {
 
   private stream: MediaStream | undefined;
   private isInCamera: boolean = false;
+
+  private updater: Updater | undefined;
 
   private readonly process: Updatable;
   private readonly onInitialized: CallableFunction;
@@ -31,38 +33,54 @@ export default class OpenCVWebCamHelper {
     this.onInitialized = onInitialized;
     this.process = process;
 
+    cv['onRuntimeInitialized'] = () => {
+      this.onInitialized();
+      this.updater = new Updater(this.video, this.canvas, this.process);
+    };
+
+    this.addEventListeners();
+    this.init();
+  }
+
+  private addEventListeners() {
+    window.addEventListener('resize', () => {
+      window.location.reload();
+    });
+
+    //Change camera
     document.addEventListener('click', () => {
       this.isInCamera = !this.isInCamera;
       this.init();
     });
-
-    this.init();
   }
 
   private init() {
     this.setSize(window.innerWidth, window.innerHeight);
 
-    if (this.stream !== undefined) {
-      this.stream.getVideoTracks().forEach((camera) => {
-        camera.stop();
-      });
-    }
+    this.stopStreamAndUpdate();
 
     getWebCamStream(this.isInCamera)
       .then((stream) => {
         this.stream = stream;
         this.video.srcObject = stream;
         this.video.play();
+
+        this.onInitialized();
+        this.updater?.startUpdateFrame();
       })
       .catch((e) => {
         console.error(e);
         return;
       });
+  }
 
-    cv['onRuntimeInitialized'] = () => {
-      this.onInitialized();
-      onRuntimeInitialized(this.video, this.canvas, this.process);
-    };
+  private stopStreamAndUpdate() {
+    this.updater?.stopUpdateFrame();
+
+    this.stream?.getVideoTracks().forEach((videoStream) => {
+      videoStream.stop();
+      this.video.srcObject = null;
+    });
   }
 
   private setSize(width: number, height: number) {

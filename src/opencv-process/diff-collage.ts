@@ -49,7 +49,7 @@ export default class DiffCollage {
   }
 
   private process(currFrame: Mat): Mat {
-    this.frame2 = currFrame;
+    currFrame.copyTo(this.frame2);
     this.frame1 ??= currFrame;
 
     this.processImage();

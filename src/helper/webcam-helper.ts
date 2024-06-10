@@ -21,11 +21,8 @@ const isAvailableWebCam = async (): Promise<boolean> => {
   return navigator.mediaDevices
     .enumerateDevices()
     .then((devices) => {
-      console.log(devices);
       const videoInputs = devices.filter((device) => device.kind === 'videoinput');
-
-      if (videoInputs.length === 0) return false;
-      return true;
+      return videoInputs.length >= 1;
     })
     .catch(() => {
       return false;

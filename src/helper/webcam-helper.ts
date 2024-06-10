@@ -1,17 +1,20 @@
 const errorMessage = 'No webcam available';
-const constraints = {
-  video: { facingMode: {}, width: window.innerWidth, height: window.innerHeight },
+const constraints = Object.freeze({
+  video: { facingMode: {}, width: 0, height: 0 },
   audio: false,
-};
-
-export type FacingModes = 'environment' | 'user';
+});
 
 export const getWebCamStream = async (isInCamera: boolean): Promise<MediaStream> => {
   if (!(await isAvailableWebCam())) throw Error(errorMessage);
 
-  constraints.video.facingMode = isInCamera ? 'user' : { exact: 'environment' };
+  const newConstraints = structuredClone(constraints);
+  const size = getVideoSize();
 
-  return navigator.mediaDevices.getUserMedia(constraints);
+  newConstraints.video.width = size.width;
+  newConstraints.video.height = size.height;
+  newConstraints.video.facingMode = isInCamera ? 'user' : 'environment';
+
+  return navigator.mediaDevices.getUserMedia(newConstraints);
 };
 
 const isAvailableWebCam = async (): Promise<boolean> => {
@@ -27,4 +30,21 @@ const isAvailableWebCam = async (): Promise<boolean> => {
     .catch(() => {
       return false;
     });
+};
+
+const getVideoSize = (): { width: number; height: number } => {
+  const orientation = (screen.orientation || {}).type;
+  const size = { width: 0, height: 0 };
+
+  if (orientation === 'portrait-primary' || orientation === 'portrait-secondary') {
+    size.width = window.innerHeight;
+    size.height = window.innerWidth;
+  }
+
+  if (orientation === 'landscape-primary' || orientation === 'landscape-secondary') {
+    size.width = window.innerWidth;
+    size.height = window.innerHeight;
+  }
+
+  return size;
 };

@@ -19,6 +19,8 @@ export default class OpenCVWebCamHelper {
   private readonly process: Updatable;
   private readonly onInitialized: CallableFunction;
 
+  private isInitializing: boolean = false;
+
   public get width() {
     return this.video.width;
   }
@@ -49,14 +51,19 @@ export default class OpenCVWebCamHelper {
 
     //Change camera
     document.addEventListener('click', () => {
-      this.isInCamera = !this.isInCamera;
-      this.init();
+      if (!this.isInitializing) {
+        this.isInCamera = !this.isInCamera;
+        this.init();
+      }
     });
   }
 
   private init() {
-    this.setSize(window.innerWidth, window.innerHeight);
+    if (this.isInitializing) return;
 
+    this.isInitializing = true;
+
+    this.setSize(window.innerWidth, window.innerHeight);
     this.stopStreamAndUpdate();
 
     getWebCamStream(this.isInCamera)
@@ -71,6 +78,9 @@ export default class OpenCVWebCamHelper {
       .catch((e) => {
         console.error(e);
         return;
+      })
+      .finally(() => {
+        this.isInitializing = false;
       });
   }
 
